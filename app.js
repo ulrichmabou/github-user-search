@@ -49,17 +49,31 @@ const createCard = (data) => `
   </div>
 `
 
+const usernames = []
+
 document.addEventListener("DOMContentLoaded", () => {
     const form = document.querySelector('form')
     form.addEventListener("submit", async (event) => {
         event.preventDefault()
         const username = document.querySelector("input").value
 
-        const response = await fetch(`https://api.github.com/users/${username}`)
-        const data = await response.json()
-        console.log(data)
+        if (usernames.includes(username)) {
+          alert('You already searched for this user')
+          return
+        }
+        usernames.push(username)
 
-        const card = createCard(data)
-        document.querySelector("#container").insertAdjacentHTML("beforeend", card)
+        const response = await fetch(`https://api.github.com/users/${username}`)
+
+        if (response.status === 200) {
+          const data = await response.json()
+          const card = createCard(data)
+          document.querySelector("#container").insertAdjacentHTML("afterbegin", card)
+          document.querySelector("input").value = ''
+        } else if (response.status === 404) {
+          alert('Username not found')
+        } else {
+          alert('A problem occurred')
+        }
     })
 })
